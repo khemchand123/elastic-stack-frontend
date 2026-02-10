@@ -18,7 +18,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={cn(inter.className, "h-screen w-full flex flex-col overflow-hidden")}>
+      <body className={inter.className}>
         <Providers>
           {children}
         </Providers>

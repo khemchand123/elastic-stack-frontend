@@ -23,7 +23,7 @@ export default function Home() {
   const hasMessages = messages.length > 0;
 
   return (
-    <main className="flex h-screen flex-col bg-background overflow-hidden">
+    <main className="flex h-[100dvh] flex-col bg-background">
       {/* Header - Always visible */}
       <header className="flex-none h-14 flex items-center justify-between border-b px-4 lg:px-6 bg-card z-10">
         <div className="flex items-center gap-2">
@@ -45,12 +45,12 @@ export default function Home() {
       </header>
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col relative overflow-hidden">
+      <div className="flex-1 flex flex-col relative min-h-0">
 
         {hasMessages ? (
           // Active Chat Layout: Scrollable messages + Fixed Input at bottom
           <>
-            <div className="flex-1 overflow-hidden">
+            <div className="flex-1 min-h-0">
               <ChatContainer messages={messages} isLoading={isLoading} />
             </div>
             <div className="flex-none w-full max-w-4xl mx-auto">

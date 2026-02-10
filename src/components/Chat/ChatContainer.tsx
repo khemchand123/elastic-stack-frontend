@@ -23,9 +23,9 @@ export function ChatContainer({ messages, isLoading }: ChatContainerProps) {
     if (messages.length === 0) return null;
 
     return (
-        <div className="flex flex-col h-full w-full max-w-4xl mx-auto">
-            <ScrollArea className="flex-1 p-4 w-full">
-                <div className="flex flex-col space-y-6 pb-4">
+        <div className="flex flex-col h-full w-full max-w-4xl mx-auto min-h-0">
+            <ScrollArea className="flex-1 w-full">
+                <div className="p-4 space-y-6 pb-20">
                     {messages.map((msg) => (
                         <MessageBubble key={msg.id} message={msg} />
                     ))}
