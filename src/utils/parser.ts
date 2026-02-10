@@ -18,7 +18,7 @@ export const parseMCPResponse = (response: string): ParsedData => {
             const content = trimmed.substring(7).trim();
             // Remove brackets if present and split
             const cleanContent = content.replace(/^\[|\]$/g, '');
-            result.header = cleanContent.split(',').map(h => h.trim());
+            result.header = cleanContent.split(',').map(h => h.trim().replace(/^["']|["']$/g, ''));
         }
         else if (trimmed.startsWith('data,')) {
             const content = trimmed.substring(5).trim();
