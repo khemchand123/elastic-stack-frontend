@@ -23,9 +23,9 @@ export default function Home() {
   const hasMessages = messages.length > 0;
 
   return (
-    <main className="flex h-[100dvh] flex-col bg-background">
+    <main className="flex h-[100dvh] flex-col bg-background overflow-hidden">
       {/* Header - Always visible */}
-      <header className="flex-none h-14 flex items-center justify-between border-b px-4 lg:px-6 bg-card z-10">
+      <header className="flex-none h-14 flex items-center justify-between border-b px-4 lg:px-6 bg-card z-20">
         <div className="flex items-center gap-2">
           <span className="font-bold text-xl text-primary">ElasticStack</span>
           <span className="font-medium text-muted-foreground hidden sm:inline-block">Explorer</span>
@@ -45,16 +45,18 @@ export default function Home() {
       </header>
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col relative min-h-0">
+      <div className="flex-1 flex flex-col relative min-h-0 overflow-hidden">
 
         {hasMessages ? (
           // Active Chat Layout: Scrollable messages + Fixed Input at bottom
           <>
-            <div className="flex-1 min-h-0">
+            <div className="flex-1 min-h-0 overflow-hidden">
               <ChatContainer messages={messages} isLoading={isLoading} />
             </div>
-            <div className="flex-none w-full max-w-4xl mx-auto">
-              <InputBar onSend={handleSend} isLoading={isLoading} />
+            <div className="flex-none w-full bg-background border-t z-30 shadow-[0_-10px_15px_-3px_rgba(0,0,0,0.05)]">
+              <div className="max-w-4xl mx-auto px-4">
+                <InputBar onSend={handleSend} isLoading={isLoading} />
+              </div>
             </div>
           </>
         ) : (

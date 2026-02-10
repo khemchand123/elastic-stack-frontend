@@ -26,8 +26,8 @@ export function InputBar({ onSend, isLoading }: InputBarProps) {
     }
 
     return (
-        <div className="p-4 bg-background border-t">
-            <div className="relative flex items-center max-w-4xl mx-auto">
+        <div className="w-full py-2">
+            <div className="relative flex items-center w-full">
                 <Textarea
                     placeholder="Ask a question about your data... (Ctrl+Enter to send)"
                     value={input}
@@ -37,19 +37,19 @@ export function InputBar({ onSend, isLoading }: InputBarProps) {
                             handleSend();
                         }
                     }}
-                    className="pr-14 min-h-[60px] py-4 resize-none rounded-xl shadow-md border-muted-foreground/20 focus-visible:ring-offset-0 focus-visible:ring-1 focus-visible:ring-primary/50 text-base"
+                    className="pr-14 min-h-[60px] py-4 resize-none rounded-xl shadow-md bg-card border-muted-foreground/20 focus-visible:ring-offset-0 focus-visible:ring-1 focus-visible:ring-primary/50 text-base"
                     disabled={isLoading}
                 />
                 <Button
                     size="icon"
-                    className="absolute right-2 top-1/2 -translate-y-1/2 h-10 w-10 shrink-0 rounded-lg"
+                    className="absolute right-2 top-11 -translate-y-1/2 h-10 w-10 shrink-0 rounded-lg z-10"
                     onClick={handleSend}
                     disabled={isLoading || !input.trim()}
                 >
                     <SendHorizontal className="h-5 w-5" />
                 </Button>
             </div>
-            <p className="text-xs text-muted-foreground text-center mt-2">
+            <p className="text-[10px] text-muted-foreground text-center mt-2">
                 AI can make mistakes. Please verify important information.
             </p>
         </div>
