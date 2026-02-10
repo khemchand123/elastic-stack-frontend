@@ -1,0 +1,15 @@
+Dockerfile
+.dockerignore
+node_modules
+npm-debug.log
+README.md
+.next
+.git
+.gitignore
+.gitlab-ci.yml
+docker-compose.yml
+components.json
+input-bar.png
+*.local
+tsconfig.ts
+next.config.ts.backup

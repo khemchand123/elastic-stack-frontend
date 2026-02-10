@@ -1,0 +1,22 @@
+version: '3.9'
+
+services:
+  elastic-stack-mcp:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: elastic-stack-mcp
+    image: elastic-stack-mcp:latest
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_MCP_WEBHOOK_URL=https://imworkflow.intermesh.net/webhook/es_mcp
+      - NEXT_PUBLIC_INDEX_LIST_API_URL=http://10.128.79.2:8080/indices
+    restart: unless-stopped
+    networks:
+      - es-net
+
+networks:
+  es-net:
+    driver: bridge
