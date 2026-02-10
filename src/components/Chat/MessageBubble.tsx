@@ -1,6 +1,5 @@
 import { Message } from "@/types/chat"
 import { cn } from "@/lib/utils"
-import { MessageTable } from "./MessageTable"
 import { Badge } from "@/components/ui/badge"
 
 interface MessageBubbleProps {
@@ -29,8 +28,21 @@ export function MessageBubble({ message }: MessageBubbleProps) {
                     {!isUser && message.parsedData ? (
                         <div className="space-y-4">
                             {message.parsedData.predata && <p>{message.parsedData.predata}</p>}
-                            {(message.parsedData.header || message.parsedData.data) && (
-                                <MessageTable header={message.parsedData.header} data={message.parsedData.data} />
+                            {message.parsedData.data && (
+                                <div className="space-y-3 my-2">
+                                    {message.parsedData.data.map((row, i) => (
+                                        <div key={i} className="p-3 rounded-md border bg-card/30 space-y-1.5 shadow-sm">
+                                            {row.map((cell, j) => (
+                                                <div key={j} className="flex flex-col sm:flex-row sm:gap-2 text-xs border-b border-border/40 last:border-0 pb-1 last:pb-0">
+                                                    <span className="font-semibold text-muted-foreground sm:min-w-[100px] uppercase tracking-wider text-[10px]">
+                                                        {message.parsedData!.header?.[j] || `Field ${j + 1}`}:
+                                                    </span>
+                                                    <span className="break-all font-mono text-foreground/90">{cell}</span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    ))}
+                                </div>
                             )}
                             {message.parsedData.postdata && <p className="text-muted-foreground italic text-xs mt-2">{message.parsedData.postdata}</p>}
                             {message.parsedData.finaly && <Badge variant="outline">{message.parsedData.finaly}</Badge>}
