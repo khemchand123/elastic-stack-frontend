@@ -1,19 +1,25 @@
-# Environment Variable Configuration
+# API Proxy Implementation
 
 ## Date: 2026-02-11
 
 ---
 
-## 🔒 Configuration Externalization
-**Task:** Move API endpoints to a `.env` file to allow configuration changes without modifying the source code.
-**Change:**
-1.  Created a `.env` file in the project root containing:
-    ```env
-    NEXT_PUBLIC_MCP_WEBHOOK_URL=https://imworkflow.intermesh.net/webhook/es_mcp
-    NEXT_PUBLIC_INDEX_LIST_API_URL=http://10.84.85.37:8081/indices
-    ```
-2.  Verified that `src/config/api.ts` reads from `process.env`.
+## 🛡️ Wrapper API Implementation
+**Task:** Create a Next.js API route to proxy requests to the Elastic backend, avoiding direct frontend-to-backend calls.
+**Solution:**
+1.  **Created Proxy Route:** Implemented `src/app/api/indices/route.ts` which acts as a server-side proxy.
+    - Handles GET requests.
+    - Fetches data from the internal Elastic endpoint (`http://10.84.85.37:8081/indices`).
+    - Exposes this data at `/api/indices`.
+2.  **Updated Configuration:**
+    - Modified `.env` to point `NEXT_PUBLIC_INDEX_LIST_API_URL` to the local `/api/indices` endpoint instead of the direct IP.
+    - Added `ELASTIC_BACKEND_URL` to `.env` for server-side use.
+    - Updated `src/config/api.ts` to default to the proxy endpoint.
 
-**How to Use:**
-- Edit the `.env` file to change the target endpoints.
-- The application will automatically pick up the new values (restart may be required for dev server).
+**Benefits:**
+- **Solves CORS Issues:** Browsers no longer block requests due to cross-origin policies.
+- **Hides Internal IP:** The actual backend IP is now hidden from the client-side code.
+- **Better Error Handling:** Server-side timeouts and errors can be logged and formatted before reaching the frontend.
+
+**Next Steps:**
+- **Restart Server:** You must restart your development server (`npm run dev`) for the new environment variables to be loaded properly.
