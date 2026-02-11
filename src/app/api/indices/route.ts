@@ -14,8 +14,40 @@ export async function GET() {
             timeout: 10000, // 10 seconds timeout for backend call
         });
 
-        // Forward the data from the backend to the frontend
-        return NextResponse.json(response.data);
+        const rawData = response.data;
+        let indices: string[] = [];
+
+        // Extract index names from response
+        if (Array.isArray(rawData)) {
+            if (rawData.length > 0 && typeof rawData[0] === 'object' && 'index' in rawData[0]) {
+                indices = rawData.map((item: any) => item.index);
+            } else if (rawData.length > 0 && typeof rawData[0] === 'string') {
+                indices = rawData as string[];
+            }
+        }
+
+        // Process indices to handle date suffixes and deduplicate
+        const processedIndices = new Set<string>();
+        // Regex to match date patterns like -2026.01.01 or -2024.12.31 at the end
+        // Also captures optional extra segments if dates are in middle, but user asked to truncate from end
+        const dateSuffixRegex = /-\d{4}\.\d{2}\.\d{2}$/;
+
+        indices.forEach(index => {
+            if (dateSuffixRegex.test(index)) {
+                // Replace the date suffix with -*
+                const normalizedIndex = index.replace(dateSuffixRegex, '-*');
+                processedIndices.add(normalizedIndex);
+            } else {
+                // Keep non-date indices as is
+                processedIndices.add(index);
+            }
+        });
+
+        // Convert Set to sorted array
+        const uniqueSortedIndices = Array.from(processedIndices).sort();
+
+        // Forward the processed data
+        return NextResponse.json(uniqueSortedIndices);
     } catch (error: any) {
         console.error('[API Proxy] Error fetching indices:', error.message);
 

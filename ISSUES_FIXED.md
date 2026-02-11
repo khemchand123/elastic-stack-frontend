@@ -1,14 +1,17 @@
-# Data Parsing Improvement
+# Index Deduplication & Wildcard Logic
 
 ## Date: 2026-02-11
 
 ---
 
-## 🔧 Index Data Parsing Update
-**Task:** Configure the frontend to correctly parse the structuredJSON response from the Elastic index list endpoint.
-**Change:** Updated `src/services/indexService.ts` to:
-1.  Detect if the API returns an array of objects (as shown in the provided logs) or strings.
-2.  Extract the `index` property from each object (e.g., `buyer_webapp_application_logs-2026.02.04`).
-3.  Sort the resulting list alphabetically for easier navigation.
+## 🧹 Index Cleanup Logic
+**Task:** Reduce clutter in the index list by consolidating time-series indices into a single wildcard entry.
+**Change:** Updated `src/app/api/indices/route.ts` with transformation logic.
+- **Before:** API returned raw list including `logs-2026.01.01`, `logs-2026.01.02`, etc.
+- **After:**
+  1.  Regex `-\d{4}\.\d{2}\.\d{2}$` identifies date suffixes.
+  2.  Transforms matching indices to end with `-*`.
+  3.  Deduplicates entries (e.g., multiple daily logs become one `logs-*` entry).
+  4.  Returns a clean, sorted unique list to the frontend.
 
-**Result:** The application now correctly displays the list of indices in the UI dropdown, handling the complex object format returned by the backend.
+**Impact:** The dropdown menu is now much cleaner, showing simplified index patterns instead of hundreds of daily indices.
