@@ -2,77 +2,81 @@ import { ParsedData } from '@/types/chat';
 
 export const parseMCPResponse = (response: string): ParsedData => {
     const result: ParsedData = {};
+    let contentToParse = response;
+
+    // 1. Try to unwrap JSON if it's the specific format: [{ "output": "..." }]
+    try {
+        const trimmed = response.trim();
+        if (trimmed.startsWith('[') || trimmed.startsWith('{')) {
+            const parsed = JSON.parse(trimmed);
+            if (Array.isArray(parsed) && parsed.length > 0 && parsed[0].output) {
+                contentToParse = parsed[0].output;
+            } else if (typeof parsed === 'object' && parsed.output) {
+                contentToParse = parsed.output;
+            }
+        }
+    } catch (e) {
+        // Not a JSON wrapper, use raw string
+    }
 
     // Normalize newlines
-    const normalized = response.replace(/\\n/g, '\n').replace(/\r\n/g, '\n');
+    const normalized = contentToParse.replace(/\\n/g, '\n').replace(/\r\n/g, '\n');
     const lines = normalized.split('\n');
 
     lines.forEach(line => {
         const trimmed = line.trim();
         if (!trimmed) return;
 
-        if (trimmed.startsWith('*predata,') || trimmed.startsWith('predata,')) {
-            result.predata = trimmed.substring(trimmed.indexOf(',') + 1).trim();
+        if (trimmed.startsWith('predata,')) {
+            result.predata = trimmed.substring(8).trim();
         }
         else if (trimmed.startsWith('header,')) {
             const content = trimmed.substring(7).trim();
-            // Remove brackets if present and split
-            const cleanContent = content.replace(/^\[|\]$/g, '');
-            result.header = cleanContent.split(',').map(h => h.trim().replace(/^["']|["']$/g, ''));
+            try {
+                // Should be valid JSON array: ["col1", "col2"]
+                result.header = JSON.parse(content);
+            } catch (e) {
+                // Fallback: simple split if not valid JSON
+                result.header = content.replace(/^\[|\]$/g, '').split(',').map(s => s.trim().replace(/^"|"$/g, ''));
+            }
         }
         else if (trimmed.startsWith('data,')) {
             const content = trimmed.substring(5).trim();
             try {
-                // Try parsing as JSON first
-                const parsed = JSON.parse(content);
-                if (Array.isArray(parsed)) {
-                    // If array of objects
-                    if (parsed.length > 0 && typeof parsed[0] === 'object' && parsed[0] !== null) {
-                        // If headers exist, match keys. If not, collect all keys.
-                        const keys = result.header || Array.from(new Set(parsed.flatMap(Object.keys)));
-                        if (!result.header) result.header = keys;
+                // The format is: [{"val1","val2",123}, {"val3","val4",456}]
+                // Convert { to [ and } to ] to make it valid JSON array of arrays
+                const validJson = content.replace(/\{/g, '[').replace(/\}/g, ']');
+                const parsedData = JSON.parse(validJson);
 
-                        result.data = parsed.map(item => keys.map(k => {
-                            const val = (item as any)[k];
-                            return typeof val === 'object' ? JSON.stringify(val) : String(val ?? '');
-                        }));
-                    } else {
-                        // Array of primitives?
-                        // result.data = parsed.map(item => [String(item)]);
-                        // Or maybe it's just a row?
-                        // Let's assume naive row behavior if not objects
-                        // But valid data usually comes as array of objects in this context
-                    }
+                if (Array.isArray(parsedData)) {
+                    result.data = parsedData.map(row => {
+                        if (Array.isArray(row)) {
+                            return row.map(cell => String(cell));
+                        }
+                        return [String(row)];
+                    });
                 }
             } catch (e) {
-                // Fallback: CSV parsing or simple split
-                // Assume CSV-like if simple text
-                // result.data = ...
-                // For now, if JSON parse fails, maybe it's just a string?
+                console.error("Error parsing data row:", e);
+                // Fallback or leave empty?
             }
         }
         else if (trimmed.startsWith('postdata,')) {
             result.postdata = trimmed.substring(9).trim();
         }
         else if (trimmed.startsWith('finaly,') || trimmed.startsWith('final,')) {
-            const idx = trimmed.indexOf(',');
-            result.finaly = trimmed.substring(idx + 1).trim();
+            // handle both 'finaly,' (typo in server output) and correct 'final,'
+            const prefix = trimmed.startsWith('finaly,') ? 'finaly,' : 'final,';
+            result.finaly = trimmed.substring(prefix.length).trim();
         }
     });
 
-    // Fallback: if no structured data found, put raw response in predata
-    if (Object.keys(result).length === 0) {
-        // Check if it looks like the raw JSON format described
-        if (response.trim().startsWith('{') && response.includes('"output":')) {
-            try {
-                const json = JSON.parse(response);
-                if (json.output) {
-                    // Recursive call with the inner string
-                    return parseMCPResponse(json.output);
-                }
-            } catch (e) { }
-        }
-        result.predata = response;
+    // If we failed to parse anything structured, treat the whole cleaned string as predata
+    // but only if we didn't extract inner output successfully initially
+    if (!result.predata && !result.header && !result.data && !result.postdata && !result.finaly) {
+        // If we extracted "output" string successfully, use that as predata
+        // Otherwise use original response
+        result.predata = contentToParse;
     }
 
     return result;

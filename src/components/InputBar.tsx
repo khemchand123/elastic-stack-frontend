@@ -42,7 +42,7 @@ export function InputBar({ onSend, isLoading }: InputBarProps) {
                 />
                 <Button
                     size="icon"
-                    className="absolute right-2 top-11 -translate-y-1/2 h-10 w-10 shrink-0 rounded-lg z-10"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 h-10 w-10 shrink-0 rounded-lg z-10"
                     onClick={handleSend}
                     disabled={isLoading || !input.trim()}
                 >

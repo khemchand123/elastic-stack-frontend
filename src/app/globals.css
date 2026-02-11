@@ -118,7 +118,18 @@
   * {
     @apply border-border outline-ring/50;
   }
+  
+  html,
   body {
     @apply bg-background text-foreground;
+    /* Force scrolling to work even if external classes try to lock it */
+    overflow: auto !important;
+    height: 100%;
+    width: 100%;
+  }
+  
+  /* Override any scroll-lock classes that might be applied */
+  body.antigravity-scroll-lock {
+    overflow: auto !important;
   }
 }
